@@ -453,3 +453,6 @@ tasks.register<UpdateAddonProjectInfos>("updateModpackProjectInfos") {
     outputFile.set(layout.projectDirectory.file("src/main/resources/assets/addon/modpack.csv"))
     projectType.set(UpdateAddonProjectInfos.AddonProjectType.MODPACK)
 }
+
+// Optional macOS arm64 .app/.dmg/.pkg packaging (opt-in, see the script).
+apply(from = "macos-app.gradle.kts")
