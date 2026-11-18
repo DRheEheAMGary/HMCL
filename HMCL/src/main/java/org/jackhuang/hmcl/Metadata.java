@@ -74,10 +74,17 @@ public final class Metadata {
             HMCL_USER_HOME = Path.of(hmclHome).toAbsolutePath().normalize();
         }
 
-        String hmclCurrentDir = System.getProperty("hmcl.dir", System.getenv("HMCL_LOCAL_HOME"));
-        HMCL_LOCAL_HOME = StringUtils.isNotBlank(hmclCurrentDir)
-                ? Path.of(hmclCurrentDir).toAbsolutePath().normalize()
-                : CURRENT_DIRECTORY.resolve(".hmcl");
+        @Nullable String hmclCurrentDir = System.getProperty("hmcl.dir", System.getenv("HMCL_LOCAL_HOME"));
+        if (StringUtils.isNotBlank(hmclCurrentDir)) {
+            HMCL_LOCAL_HOME = Path.of(hmclCurrentDir).toAbsolutePath().normalize();
+        } else if (SystemInfo.CURRENT_OS == OperatingSystem.MACOS && CURRENT_DIRECTORY.getParent() == null) {
+            // jpackage-generated macOS .app launchers set user.dir to the
+            // filesystem root, which is not writable. Fall back to the
+            // per-user Application Support directory instead of /.hmcl.
+            HMCL_LOCAL_HOME = HMCL_USER_HOME;
+        } else {
+            HMCL_LOCAL_HOME = CURRENT_DIRECTORY.resolve(".hmcl");
+        }
 
         String hmclDependencies = System.getProperty("hmcl.dependencies.dir", System.getenv("HMCL_DEPENDENCIES_DIR"));
         DEPENDENCIES_DIRECTORY = StringUtils.isNotBlank(hmclDependencies)
